@@ -3,12 +3,15 @@ package server
 import (
 	"net"
 	"io"
+	"bufio"
 )
 
 type server 	struct {
 	address	string
+	events map[byte]func(s *Session, p* Packet)
 	onConnected func(s *Session)
 	onDisconnected func(s *Session)
+	onUnknownPacket func(s *Session, p* Packet)
 }
 
 type Session struct {
@@ -18,8 +21,10 @@ type Session struct {
 func New(address string) *server {
 	return &server{
 		address,
+		make(map[byte]func(s *Session, p *Packet)),
 		func(s *Session) {},
-		func(s *Session) {}}
+		func(s *Session) {},
+		func(s *Session, p *Packet) {}}
 }
 
 func (s *server) OnConnected(callback func(s *Session)) {
@@ -28,6 +33,14 @@ func (s *server) OnConnected(callback func(s *Session)) {
 
 func (s *server) OnDisconnected(callback func(s *Session)) {
 	s.onDisconnected = callback
+}
+
+func (s *server) OnUnknownPacket(callback func(s *Session, p *Packet)) {
+	s.onUnknownPacket = callback
+}
+
+func (s *server) On(type_ byte, callback func(s *Session, p *Packet)) {
+	s.events[type_] = callback
 }
 
 func (s *server) Start() error {
@@ -54,13 +67,31 @@ func (s *server) listen(session *Session) {
 		session.conn.Close()
 	}()
 
-	var buffer = make([]byte, 1024)
+	var (
+		buffer = make([]byte, 1024)
+		reader = bufio.NewReader(session.conn)
+	)
 
 	for {
-		_, err := session.conn.Read(buffer)
+		_, err := reader.Read(buffer)
 
 		if err == io.EOF || err != nil {
 			return
 		}
+
+		p := ToPacket(buffer)
+
+		if event, ok := s.events[p.Type()]; ok {
+			event(session, p)
+		} else {
+			s.onUnknownPacket(session, p)
+		}
 	}
+}
+
+func (s *Session) Send(type_ byte, data ...interface{}) int {
+	p := NewPacket(type_)
+	p.Write(data...)
+	n, _ := s.conn.Write(p.Buffer())
+	return n
 }
