@@ -5,32 +5,36 @@ import (
 	"github.com/lafreak/go-event-server"
 )
 
-func main() {
-	socket := server.New("localhost:3000")
+/*
+	This example takes you to character selection screen when using game client of game KalOnline.
+ */
 
-	socket.OnConnected(func(s *server.Session) {
+func main() {
+	game := server.New("localhost:3000")
+
+	game.OnConnected(func(s *server.Session) {
 		fmt.Println("Client connected.")
 	})
 
-	socket.OnDisconnected(func(s *server.Session) {
+	game.OnDisconnected(func(s *server.Session) {
 		fmt.Println("Client disconnected.")
 	})
 
-	socket.OnUnknownPacket(func(s *server.Session, p *server.Packet) {
+	game.OnUnknownPacket(func(s *server.Session, p *server.Packet) {
 		fmt.Println("Unknown packet:", p.Type())
 	})
 
 	// C2S_CONNECT
-	socket.On(9, func(s *server.Session, p *server.Packet) {
+	game.On(9, func(s *server.Session, p *server.Packet) {
 		// S2C_CODE
 		s.Send(125, 0, byte(0), 604800, 0, 0, uint64(0), byte(0), byte(0), byte(2))
 	})
 
 	// C2S_ANS_CODE
-	socket.On(4, func(s *server.Session, p *server.Packet) {})
+	game.On(4, func(s *server.Session, p *server.Packet) {})
 
 	// C2S_LOGIN
-	socket.On(8, func(s *server.Session, p *server.Packet) {
+	game.On(8, func(s *server.Session, p *server.Packet) {
 		var login, password, mac string
 		p.Read(&login, &password, &mac)
 
@@ -41,10 +45,10 @@ func main() {
 	})
 
 	// C2S_SECOND_LOGIN
-	socket.On(10, func(s *server.Session, p *server.Packet) {
+	game.On(10, func(s *server.Session, p *server.Packet) {
 		// S2C_PLAYERINFO
 		s.Send(114, byte(0), byte(0), 0, byte(1), 1, "Liplay", byte(4), byte(11), byte(60), 0, uint16(5), uint16(5), uint16(5), uint16(5), uint16(5), byte(0), byte(0), byte(0))
 	})
 
-	socket.Start()
+	game.Start()
 }
