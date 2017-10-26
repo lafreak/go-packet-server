@@ -50,5 +50,8 @@ func main() {
 		s.Send(114, byte(0), byte(0), 0, byte(1), 1, "Liplay", byte(4), byte(11), byte(60), 0, uint16(5), uint16(5), uint16(5), uint16(5), uint16(5), byte(0), byte(0), byte(0))
 	})
 
-	game.Start()
+	err := game.Start()
+	if err != nil {
+		fmt.Println(err)
+	}
 }
