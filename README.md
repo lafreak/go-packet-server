@@ -105,5 +105,5 @@ func main() {
 
 ## Todo
 - packet encrypt/decrypt
-- make a client package
 - read/write raw data and float
+- code client for various languages
