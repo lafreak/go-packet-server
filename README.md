@@ -68,37 +68,37 @@ go get -u github.com/lafreak/go-packet-server
 package main
 
 import (
-	"fmt"
-	"github.com/lafreak/go-packet-server"
+"fmt"
+  "github.com/lafreak/go-packet-server"
 )
 
 func main() {
-	game := server.New("localhost:3000")
+  game := server.New("localhost:3000")
 
   // Subscribe to connection event.
-	game.OnConnected(func(s *server.Session) {
-		fmt.Println("Client connected.")
-	})
+  game.OnConnected(func(s *server.Session) {
+    fmt.Println("Client connected.")
+  })
 
   // Subscribe to disconnection event.
-	game.OnDisconnected(func(s *server.Session) {
-		fmt.Println("Client disconnected.")
-	})
+  game.OnDisconnected(func(s *server.Session) {
+    fmt.Println("Client disconnected.")
+  })
 
   // This event fires when undefined packet was received.
   // It means client send packet of type you did not subscribed to.
-	game.OnUnknownPacket(func(s *server.Session, p *server.Packet) {
-		fmt.Println("Unknown packet:", p.Type())
-	})
+  game.OnUnknownPacket(func(s *server.Session, p *server.Packet) {
+    fmt.Println("Unknown packet:", p.Type())
+  })
 
   // Subscribe to incoming packets of type 25.
   // Read integer from packet stream.
   game.On(25, func(s *server.Session, p *server.Packet) {
     var n int
     p.Read(&n)
-		fmt.Println("N was sent:", n)
-	})
+    fmt.Println("N was sent:", n)
+  })
 
-	game.Start()
+  game.Start()
 }
 ```
