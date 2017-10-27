@@ -102,3 +102,8 @@ func main() {
   game.Start()
 }
 ```
+
+## Todo
+- packet encrypt/decrypt
+- make a client package
+- read/write raw data and float
