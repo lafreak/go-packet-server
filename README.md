@@ -8,7 +8,7 @@ In some cases you want your app to send and receive `integer`, `byte`, `float` o
 It is when this package may come in handy.  
   
 ## Packet type
-Structure of example packet
+Structure of example packet:
 ```
 0x07 0x00 0x08 0xC2 0x00 0x00 0x00
 |_______| |__| |_________________|
@@ -96,7 +96,7 @@ func main() {
   game.On(25, func(s *server.Session, p *server.Packet) {
     var n int
     p.Read(&n)
-    fmt.Println("N was sent:", n)
+    fmt.Println("N was received:", n)
   })
 
   game.Start()
