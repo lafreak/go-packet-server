@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lafreak/go-event-server"
+	"github.com/lafreak/go-packet-server"
 )
 
 /*
