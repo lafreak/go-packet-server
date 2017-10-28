@@ -68,7 +68,7 @@ game.On(200 /* When server receives packet of type 200 */, func(s *server.Sessio
 package main
 
 import (
-"fmt"
+  "fmt"
   "github.com/lafreak/go-packet-server"
 )
 
