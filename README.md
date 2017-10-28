@@ -15,8 +15,8 @@ go get -u github.com/lafreak/go-packet-server
 ## Packet class
 Structure of example packet:
 ```
-0x07 0x00 0x08 0xC2 0x00 0x00 0x00
-|_______| |__| |_________________|
+0x07 0x00 0x08 0xC2 0x00 0x00 0x00 ...
+|_______| |__| |_____________________|
     |      |      |
     |      |      `----- Data
     |      |
