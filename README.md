@@ -6,8 +6,13 @@ Example: [repo](https://github.com/firstrow/tcp_server).
   
 In some cases you want your app to send and receive `integer`, `byte`, `float` or raw data.
 It is when this package may come in handy.  
+
+## Installation
+```
+go get -u github.com/lafreak/go-packet-server
+```
   
-## Packet type
+## Packet class
 Structure of example packet:
 ```
 0x07 0x00 0x08 0xC2 0x00 0x00 0x00
@@ -56,11 +61,6 @@ Or just use `session.Send` method that creates and sends packet for you:
 game.On(200 /* When server receives packet of type 200 */, func(s *server.Session, p *server.Packet) {
   s.Send(9 /* Type */, 3, "Go", byte(2))
 })
-```
-
-## Installation
-```
-go get -u github.com/lafreak/go-packet-server
 ```
 
 ## Sample usage
