@@ -35,7 +35,7 @@ It can be interpreted on many different ways for example:
 - `2 byte values` - interpreted as byte `194` (`C2 00`) and `0` (`00 00`)  
 - `3 strings` - interpreted as `"Â"` (`C2 00`), `""` (`00`), `""` (`00`)
   
-Notice: all data is interpreted in little endian order. Strings terminate with `0`.
+Notice: all data is interpreted in little endian order. Strings terminate with `0`. Max packet size is `1024 bytes`.
 
 ## Read from packet
 Example packet:  `0x13 0x00 0x01 0x2D 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0x47 0x6F 0x4C 0x61 0x6E 0x67 0x00`
