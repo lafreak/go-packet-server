@@ -62,47 +62,6 @@ func (s *server) Start() error {
 	}
 }
 
-func (s *server) listen2(session *Session) {
-	s.onConnected(session)
-
-	defer func() {
-		s.onDisconnected(session)
-		session.conn.Close()
-	}()
-
-	var (
-		buffer = make([]byte, 1024)
-		reader = bufio.NewReader(session.conn)
-	)
-
-	for {
-		n, err := reader.Read(buffer)
-
-		if err == io.EOF || err != nil {
-			return
-		}
-
-		for n > 0 {
-			m := binary.LittleEndian.Uint16(buffer[:2])
-			p := ToPacket(buffer[:m])
-
-			n -= int(m)
-			buffer = buffer[m:]
-			if p == nil {
-				continue
-			}
-
-			if event, ok := s.events[p.Type()]; ok {
-				event(session, p)
-			} else {
-				s.onUnknownPacket(session, p)
-			}
-		}
-
-		buffer = make([]byte, 1024)
-	}
-}
-
 func (s *server) listen(session *Session) {
 	s.onConnected(session)
 
