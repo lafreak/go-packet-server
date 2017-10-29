@@ -33,6 +33,7 @@ Structure of example packet:
 It can be interpreted on many different ways for example:  
 - `1 integer value` - interpreted as number `194` (`C2 00 00 00`)  
 - `2 byte values` - interpreted as byte `194` (`C2 00`) and `0` (`00 00`)  
+- `3 strings` - interpreted as `"Â"` (`C2 00`), `""` (`00`), `""` (`00`)
   
 Notice: all data is interpreted in little endian order. Strings terminate with `0`.
 
