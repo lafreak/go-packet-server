@@ -10,6 +10,10 @@ type Packet struct {
 }
 
 func ToPacket(data []byte) *Packet {
+	if len(data) < 3 {
+		return nil
+	}
+
 	return &Packet{data}
 }
 

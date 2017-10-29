@@ -4,6 +4,7 @@ import (
 	"net"
 	"io"
 	"bufio"
+	"encoding/binary"
 )
 
 type server 	struct {
@@ -73,19 +74,30 @@ func (s *server) listen(session *Session) {
 	)
 
 	for {
-		_, err := reader.Read(buffer)
+		n, err := reader.Read(buffer)
 
 		if err == io.EOF || err != nil {
 			return
 		}
 
-		p := ToPacket(buffer)
+		for n > 0 {
+			m := binary.LittleEndian.Uint16(buffer[:2])
+			p := ToPacket(buffer[:m])
 
-		if event, ok := s.events[p.Type()]; ok {
-			event(session, p)
-		} else {
-			s.onUnknownPacket(session, p)
+			n -= int(m)
+			buffer = buffer[m:]
+			if p == nil {
+				continue
+			}
+
+			if event, ok := s.events[p.Type()]; ok {
+				event(session, p)
+			} else {
+				s.onUnknownPacket(session, p)
+			}
 		}
+
+		buffer = make([]byte, 1024)
 	}
 }
 
