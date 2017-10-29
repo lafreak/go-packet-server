@@ -13,6 +13,7 @@ type server 	struct {
 	onConnected func(s *Session)
 	onDisconnected func(s *Session)
 	onUnknownPacket func(s *Session, p* Packet)
+	reader *bufio.Reader
 }
 
 type Session struct {
@@ -25,7 +26,8 @@ func New(address string) *server {
 		make(map[byte]func(s *Session, p *Packet)),
 		func(s *Session) {},
 		func(s *Session) {},
-		func(s *Session, p *Packet) {}}
+		func(s *Session, p *Packet) {},
+		nil}
 }
 
 func (s *server) OnConnected(callback func(s *Session)) {
@@ -60,7 +62,7 @@ func (s *server) Start() error {
 	}
 }
 
-func (s *server) listen(session *Session) {
+func (s *server) listen2(session *Session) {
 	s.onConnected(session)
 
 	defer func() {
@@ -99,6 +101,62 @@ func (s *server) listen(session *Session) {
 
 		buffer = make([]byte, 1024)
 	}
+}
+
+func (s *server) listen(session *Session) {
+	s.onConnected(session)
+
+	defer func() {
+		s.onDisconnected(session)
+		session.conn.Close()
+	}()
+
+	s.reader = bufio.NewReader(session.conn)
+
+	for {
+		packets, err := s.receive()
+		if err != nil {
+			return;
+		}
+
+		for _, p := range packets {
+			if event, ok := s.events[p.Type()]; ok {
+				event(session, p)
+			} else {
+				s.onUnknownPacket(session, p)
+			}
+		}
+	}
+}
+
+func (s *server) receive() ([]*Packet, error) {
+	buffer := make([]byte, 1024)
+	packets := make([]*Packet, 0)
+
+	n, err := s.reader.Read(buffer)
+	if err == io.EOF || err != nil {
+		return nil, err
+	}
+
+	for n > 0 {
+		m := binary.LittleEndian.Uint16(buffer[:2])
+		if m == 0 {
+			m = 1
+		}
+
+		p := ToPacket(buffer[:m])
+
+		n -= int(m)
+		buffer = append(buffer[m:], make([]byte, m)...)
+
+		if m < 3 {
+			continue;
+		}
+
+		packets = append(packets, p)
+	}
+
+	return packets, nil
 }
 
 func (s *Session) Send(type_ byte, data ...interface{}) int {
