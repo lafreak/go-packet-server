@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"encoding/binary"
+	"bytes"
+	"math"
 )
 
 type Packet struct {
@@ -129,6 +131,20 @@ func (p *Packet) Write(data ...interface{}) {
 			p.data = append(p.data, b...)
 			p.data = append(p.data, 0)
 			p.addSize(uint16(len(v)+1))
+		case float32:
+			var b bytes.Buffer
+			err := binary.Write(&b, binary.LittleEndian, float32(v))
+			if err == nil {
+				p.data = append(p.data, b.Bytes()...)
+				p.addSize(4)
+			}
+		case float64:
+			var b bytes.Buffer
+			err := binary.Write(&b, binary.LittleEndian, float64(v))
+			if err == nil {
+				p.data = append(p.data, b.Bytes()...)
+				p.addSize(8)
+			}
 		}
 	}
 }
@@ -189,6 +205,16 @@ func (p *Packet) Read(variables ...interface{}) {
 			if n, s := p.extractString(); n > 0 {
 				*v = s
 				p.removeSize(n)
+			}
+		case *float32:
+			if p.Size() >= 3 + 4 {
+				*v = math.Float32frombits(binary.LittleEndian.Uint32(p.data[3:3 + 4]))
+				p.removeSize(4)
+			}
+		case *float64:
+			if p.Size() >= 3 + 8 {
+				*v = math.Float64frombits(binary.LittleEndian.Uint64(p.data[3:3 + 8]))
+				p.removeSize(8)
 			}
 		}
 	}

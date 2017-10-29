@@ -169,3 +169,61 @@ func TestString(t *testing.T) {
 		t.Fatal("Expected byte 0, got", p.Buffer()[9])
 	}
 }
+
+func TestFloat32(t *testing.T) {
+	p := Packet{[]byte{3, 0, 1}}
+
+	p.Write(float32(10.25))
+
+	if p.Size() != 7 {
+		t.Fatal("Expected size 7, got", p.Size())
+	}
+
+	if p.Buffer()[3] != 0 {
+		t.Fatal("Expected byte 0, got", p.Buffer()[3])
+	}
+	if p.Buffer()[4] != 0 {
+		t.Fatal("Expected byte 0, got", p.Buffer()[4])
+	}
+	if p.Buffer()[5] != 36 {
+		t.Fatal("Expected byte 36, got", p.Buffer()[5])
+	}
+	if p.Buffer()[6] != 65 {
+		t.Fatal("Expected byte 65, got", p.Buffer()[6])
+	}
+}
+
+func TestFloat64(t *testing.T) {
+	p := Packet{[]byte{3, 0, 1}}
+
+	p.Write(10.3195123)
+
+	if p.Size() != 11 {
+		t.Fatal("Expected size 11, got", p.Size())
+	}
+
+	if p.Buffer()[3] != 232 {
+		t.Fatal("Expected byte 232, got", p.Buffer()[3])
+	}
+	if p.Buffer()[4] != 86 {
+		t.Fatal("Expected byte 86, got", p.Buffer()[4])
+	}
+	if p.Buffer()[5] != 190 {
+		t.Fatal("Expected byte 190, got", p.Buffer()[5])
+	}
+	if p.Buffer()[6] != 29 {
+		t.Fatal("Expected byte 29, got", p.Buffer()[6])
+	}
+	if p.Buffer()[7] != 151 {
+		t.Fatal("Expected byte 151, got", p.Buffer()[7])
+	}
+	if p.Buffer()[8] != 163 {
+		t.Fatal("Expected byte 163, got", p.Buffer()[8])
+	}
+	if p.Buffer()[9] != 36 {
+		t.Fatal("Expected byte 36, got", p.Buffer()[9])
+	}
+	if p.Buffer()[10] != 64 {
+		t.Fatal("Expected byte 64, got", p.Buffer()[10])
+	}
+}

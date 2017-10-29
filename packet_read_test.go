@@ -223,3 +223,33 @@ func TestReadString(t *testing.T) {
 		t.Fatal("Expected empty string, got:", val)
 	}
 }
+
+func TestReadFloat32(t *testing.T) {
+	p := Packet{[]byte{7, 0, 1, 205, 204, 12, 64}}
+
+	var val float32
+	p.Read(&val)
+
+	if p.Size() != 3 {
+		t.Fatal("Expected size 3, got", p.Size())
+	}
+
+	if val != 2.2 {
+		t.Fatal("Expected value 2.2, got", val)
+	}
+}
+
+func TestReadFloat64(t *testing.T) {
+	p := Packet{[]byte{11, 0, 1, 0x71, 0x3d, 0x0a, 0xd7, 0xa3, 0x70, 0xcd, 0x3f}}
+
+	var val float64
+	p.Read(&val)
+
+	if p.Size() != 3 {
+		t.Fatal("Expected size 3, got", p.Size())
+	}
+
+	if val != 0.23 {
+		t.Fatal("Expected val 0.23, got", val)
+	}
+}
