@@ -138,13 +138,13 @@ func (s *Session) SendPacket(p *Packet) int {
 	return n
 }
 
-func (s *server) SendToAll(type_ byte, data ...interface{}) {
+func (s *server) Broadcast(type_ byte, data ...interface{}) {
 	p := NewPacket(type_)
 	p.Write(data...)
-	s.SendPacketToAll(p)
+	s.BroadcastPacket(p)
 }
 
-func (s *server) SendPacketToAll(p *Packet) {
+func (s *server) BroadcastPacket(p *Packet) {
 	for _, session := range s.sessions {
 		session.SendPacket(p)
 	}
