@@ -5,29 +5,32 @@ import (
 	"io"
 	"bufio"
 	"encoding/binary"
+	"github.com/satori/go.uuid"
 )
 
 type server 	struct {
 	address	string
 	events map[byte]func(s *Session, p* Packet)
+	sessions map[string]*Session
 	onConnected func(s *Session)
 	onDisconnected func(s *Session)
 	onUnknownPacket func(s *Session, p* Packet)
-	reader *bufio.Reader
 }
 
 type Session struct {
 	conn net.Conn
+	reader *bufio.Reader
+	id uuid.UUID
 }
 
 func New(address string) *server {
 	return &server{
 		address,
 		make(map[byte]func(s *Session, p *Packet)),
+		make(map[string]*Session),
 		func(s *Session) {},
 		func(s *Session) {},
-		func(s *Session, p *Packet) {},
-		nil}
+		func(s *Session, p *Packet) {}}
 }
 
 func (s *server) OnConnected(callback func(s *Session)) {
@@ -58,22 +61,25 @@ func (s *server) Start() error {
 		if err != nil {
 			return err
 		}
-		go s.listen(&Session{conn})
+		go s.listen(&Session{
+			conn,
+			bufio.NewReader(conn),
+			uuid.NewV4()})
 	}
 }
 
 func (s *server) listen(session *Session) {
+	s.sessions[session.Id()] = session
 	s.onConnected(session)
 
 	defer func() {
 		s.onDisconnected(session)
+		delete(s.sessions, session.Id())
 		session.conn.Close()
 	}()
 
-	s.reader = bufio.NewReader(session.conn)
-
 	for {
-		packets, err := s.receive()
+		packets, err := session.receive()
 		if err != nil {
 			return
 		}
@@ -88,7 +94,7 @@ func (s *server) listen(session *Session) {
 	}
 }
 
-func (s *server) receive() ([]*Packet, error) {
+func (s *Session) receive() ([]*Packet, error) {
 	buffer := make([]byte, 1024)
 	packets := make([]*Packet, 0)
 
@@ -130,4 +136,20 @@ func (s *Session) Send(type_ byte, data ...interface{}) int {
 func (s *Session) SendPacket(p *Packet) int {
 	n, _ := s.conn.Write(p.Buffer())
 	return n
+}
+
+func (s *server) SendToAll(type_ byte, data ...interface{}) {
+	p := NewPacket(type_)
+	p.Write(data...)
+	s.SendPacketToAll(p)
+}
+
+func (s *server) SendPacketToAll(p *Packet) {
+	for _, session := range s.sessions {
+		session.SendPacket(p)
+	}
+}
+
+func (s *Session) Id() string {
+	return s.id.String()
 }
