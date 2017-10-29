@@ -75,7 +75,7 @@ func (s *server) listen(session *Session) {
 	for {
 		packets, err := s.receive()
 		if err != nil {
-			return;
+			return
 		}
 
 		for _, p := range packets {
@@ -102,6 +102,9 @@ func (s *server) receive() ([]*Packet, error) {
 		if m == 0 {
 			m = 1
 		}
+		if m > 1024 {
+			m = 1024
+		}
 
 		p := ToPacket(buffer[:m])
 
@@ -109,7 +112,7 @@ func (s *server) receive() ([]*Packet, error) {
 		buffer = append(buffer[m:], make([]byte, m)...)
 
 		if m < 3 {
-			continue;
+			continue
 		}
 
 		packets = append(packets, p)
@@ -121,6 +124,10 @@ func (s *server) receive() ([]*Packet, error) {
 func (s *Session) Send(type_ byte, data ...interface{}) int {
 	p := NewPacket(type_)
 	p.Write(data...)
+	return s.SendPacket(p)
+}
+
+func (s *Session) SendPacket(p *Packet) int {
 	n, _ := s.conn.Write(p.Buffer())
 	return n
 }
