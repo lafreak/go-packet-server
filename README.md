@@ -4,13 +4,15 @@ TCP server implementation that cuts incoming data into packets.
 Most TCP server example codes read data up to `byte 0` which terminates message and treats it as string which is very limited. 
 Example: [repo](https://github.com/firstrow/tcp_server).  
   
-In some cases you want your app to send and receive `integer`, `byte`, `float` or raw data.
-It is when this package may come in handy.  
+In some cases you want your app to send and receive `integer`, `byte`, `float` or raw data, then this package may come in handy.  
 
 ## Installation
 ```
 go get -u github.com/lafreak/go-packet-server
 ```
+
+## Client implementation
+- [C# (NuGet package)](https://github.com/lafreak/PacketClient-cs)
   
 ## Packet class
 Structure of example packet:
@@ -27,7 +29,7 @@ Structure of example packet:
 
 `Size` - first 2 bytes are reserved for packet size. This way server is sure how many bytes should be read from stream.  
 `Type` - packet identifier. Each packet can be treated like an event, you can subscribe to each incoming packet of certain type.  
-`Data` - custom information. This is space for all that comes with packet. 
+`Data` - custom information. This is space for all data that comes with packet. 
 It can be interpreted on many different ways for example:  
 - `1 integer value` - interpreted as number `194` (`C2 00 00 00`)  
 - `2 byte values` - interpreted as byte `194` (`C2 00`) and `0` (`00 00`)  
