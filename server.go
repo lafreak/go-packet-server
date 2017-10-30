@@ -8,7 +8,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type server 	struct {
+type Server struct {
 	address	string
 	events map[byte]func(s *Session, p* Packet)
 	sessions map[string]*Session
@@ -23,8 +23,8 @@ type Session struct {
 	id uuid.UUID
 }
 
-func New(address string) *server {
-	return &server{
+func New(address string) *Server {
+	return &Server{
 		address,
 		make(map[byte]func(s *Session, p *Packet)),
 		make(map[string]*Session),
@@ -33,23 +33,23 @@ func New(address string) *server {
 		func(s *Session, p *Packet) {}}
 }
 
-func (s *server) OnConnected(callback func(s *Session)) {
+func (s *Server) OnConnected(callback func(s *Session)) {
 	s.onConnected = callback
 }
 
-func (s *server) OnDisconnected(callback func(s *Session)) {
+func (s *Server) OnDisconnected(callback func(s *Session)) {
 	s.onDisconnected = callback
 }
 
-func (s *server) OnUnknownPacket(callback func(s *Session, p *Packet)) {
+func (s *Server) OnUnknownPacket(callback func(s *Session, p *Packet)) {
 	s.onUnknownPacket = callback
 }
 
-func (s *server) On(type_ byte, callback func(s *Session, p *Packet)) {
+func (s *Server) On(type_ byte, callback func(s *Session, p *Packet)) {
 	s.events[type_] = callback
 }
 
-func (s *server) Start() error {
+func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", s.address)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (s *server) Start() error {
 	}
 }
 
-func (s *server) listen(session *Session) {
+func (s *Server) listen(session *Session) {
 	s.sessions[session.Id()] = session
 	s.onConnected(session)
 
@@ -138,13 +138,13 @@ func (s *Session) SendPacket(p *Packet) int {
 	return n
 }
 
-func (s *server) Broadcast(type_ byte, data ...interface{}) {
+func (s *Server) Broadcast(type_ byte, data ...interface{}) {
 	p := NewPacket(type_)
 	p.Write(data...)
 	s.BroadcastPacket(p)
 }
 
-func (s *server) BroadcastPacket(p *Packet) {
+func (s *Server) BroadcastPacket(p *Packet) {
 	for _, session := range s.sessions {
 		session.SendPacket(p)
 	}
@@ -153,3 +153,4 @@ func (s *server) BroadcastPacket(p *Packet) {
 func (s *Session) Id() string {
 	return s.id.String()
 }
+
