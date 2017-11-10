@@ -49,6 +49,26 @@ func (s *Server) On(type_ byte, callback func(s *Session, p *Packet)) {
 	s.events[type_] = callback
 }
 
+func (s *Server) ForEachSession(callback func(session *Session)) {
+	for _, sess := range s.sessions {
+		callback(sess)
+	}
+}
+
+func (s *Server) ForEach(ids []string, callback func(session *Session)) {
+	for _, id := range ids {
+		if sess, ok := s.sessions[id]; ok {
+			callback(sess)
+		}
+	}
+}
+
+func (s *Server) For(id string, callback func(session *Session)) {
+	if sess, ok := s.sessions[id]; ok {
+		callback(sess)
+	}
+}
+
 func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", s.address)
 	if err != nil {
